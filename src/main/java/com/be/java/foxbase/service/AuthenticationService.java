@@ -6,11 +6,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
-import com.be.java.foxbase.entity.InvalidatedToken;
+import com.be.java.foxbase.db.entity.InvalidatedToken;
 import com.be.java.foxbase.repository.InvalidatedTokenRepository;
 import com.be.java.foxbase.repository.UserRepository;
 import com.be.java.foxbase.exception.AppException;
-import com.be.java.foxbase.entity.User;
+import com.be.java.foxbase.db.entity.User;
 import com.be.java.foxbase.dto.response.AuthenticationResponse;
 import com.be.java.foxbase.dto.response.IntrospectResponse;
 import com.be.java.foxbase.dto.request.AuthenticationRequest;

@@ -24,9 +24,7 @@ public class BookService {
     BookMapper bookMapper;
 
     public BookResponse publish(BookCreationRequest request){
-        var owner = userRepository.findByUsername(request.getPublisher()).
-                orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
-        var book = bookMapper.toBook(request, owner);
+        var book = bookMapper.toBook(request);
         bookRepository.save(book);
         return bookMapper.toBookResponse(book);
     }

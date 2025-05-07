@@ -1,5 +1,6 @@
-package com.be.java.foxbase.entity;
+package com.be.java.foxbase.db.entity;
 
+import com.be.java.foxbase.db.key.InteractionId;
 import com.be.java.foxbase.utils.InteractionType;
 import jakarta.persistence.*;
 import lombok.*;

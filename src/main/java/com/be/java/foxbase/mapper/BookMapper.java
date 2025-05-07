@@ -2,8 +2,8 @@ package com.be.java.foxbase.mapper;
 
 import com.be.java.foxbase.dto.request.BookCreationRequest;
 import com.be.java.foxbase.dto.response.BookResponse;
-import com.be.java.foxbase.entity.Book;
-import com.be.java.foxbase.entity.User;
+import com.be.java.foxbase.db.entity.Book;
+import com.be.java.foxbase.db.entity.User;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,7 +21,7 @@ public class BookMapper {
                 build();
     }
 
-    public Book toBook(BookCreationRequest request, User owner) {
+    public Book toBook(BookCreationRequest request) {
         return Book.builder()
                 .title(request.getTitle())
                 .author(request.getAuthor())
@@ -31,7 +31,6 @@ public class BookMapper {
                 .averageRating(0.0)
                 .contentUrl(request.getContentUrl())
                 .imageUrl(request.getImageUrl())
-                .owner(owner)
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.be.java.foxbase.entity;
+package com.be.java.foxbase.db.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,8 +23,4 @@ public class Book {
     String genre;
     Double price;
     Double averageRating;
-
-    @ManyToOne
-    @JoinColumn(name = "owner_username")
-    User owner;
 }

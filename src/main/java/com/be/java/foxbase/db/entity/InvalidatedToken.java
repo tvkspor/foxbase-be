@@ -1,4 +1,4 @@
-package com.be.java.foxbase.entity;
+package com.be.java.foxbase.db.entity;
 
 import java.util.Date;
 

@@ -1,21 +1,21 @@
-package com.be.java.foxbase.dto.response;
+package com.be.java.foxbase.db.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
+@Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
+public class User {
+    @Id
     String username;
+    String password;
     String email;
     String fName;
     String lName;
     Double balance;
-    List<Long> myBooks;
-    List<Long> myFavorites;
 }

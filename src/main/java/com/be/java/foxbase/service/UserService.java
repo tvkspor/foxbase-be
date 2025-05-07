@@ -2,7 +2,8 @@ package com.be.java.foxbase.service;
 
 import com.be.java.foxbase.dto.request.UserCreationRequest;
 import com.be.java.foxbase.dto.response.UserResponse;
-import com.be.java.foxbase.entity.User;
+import com.be.java.foxbase.db.entity.Book;
+import com.be.java.foxbase.db.entity.User;
 import com.be.java.foxbase.exception.AppException;
 import com.be.java.foxbase.exception.ErrorCode;
 import com.be.java.foxbase.mapper.UserMapper;
@@ -12,6 +13,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 
 @Service
 public class UserService {
@@ -42,6 +45,7 @@ public class UserService {
         var username = context.getAuthentication().getName();
 
         User user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+
         return userMapper.toUserResponse(user);
     }
 }

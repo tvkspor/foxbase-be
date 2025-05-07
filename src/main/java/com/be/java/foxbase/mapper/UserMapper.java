@@ -2,14 +2,15 @@ package com.be.java.foxbase.mapper;
 
 import com.be.java.foxbase.dto.request.UserCreationRequest;
 import com.be.java.foxbase.dto.response.UserResponse;
-import com.be.java.foxbase.entity.User;
+import com.be.java.foxbase.db.entity.User;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 
 @Component
 public class UserMapper {
-    public UserResponse toUserResponse(User user){
+    public UserResponse toUserResponse(User user) {
         return UserResponse.builder()
                 .username(user.getUsername())
                 .email(user.getEmail())
@@ -27,10 +28,6 @@ public class UserMapper {
                 .fName(userCreationRequest.getFName())
                 .password(userCreationRequest.getPassword())
                 .balance(0.0)
-                .boughtBooks(Collections.emptyList())
-                .favoriteBooks(Collections.emptyList())
-                .interactions(Collections.emptyList())
-                .myBooks(Collections.emptyList())
                 .build();
     }
 }

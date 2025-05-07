@@ -1,18 +1,19 @@
-package com.be.java.foxbase.entity;
+package com.be.java.foxbase.db.key;
 
 import jakarta.persistence.Embeddable;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 
 @Embeddable
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@EqualsAndHashCode
-public class UserBookRatingId implements Serializable {
+public class InteractionId implements Serializable {
+    String interactUsername;
     String creatorUsername;
     Long ratedBookId;
 }

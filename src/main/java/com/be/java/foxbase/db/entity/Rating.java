@@ -1,5 +1,6 @@
-package com.be.java.foxbase.entity;
+package com.be.java.foxbase.db.entity;
 
+import com.be.java.foxbase.db.key.UserBookRatingId;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -17,18 +18,15 @@ public class Rating {
     @EmbeddedId
     UserBookRatingId userBookRatingId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("creatorUsername")
     @JoinColumn(name = "creator_username")
     User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("ratedBookId")
     @JoinColumn(name = "rated_book_id")
     Book book;
-
-    @OneToMany(mappedBy = "rating")
-    List<Interaction> interactions;
 
     Double rate;
     Integer likes;

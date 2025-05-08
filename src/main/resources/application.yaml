@@ -7,7 +7,7 @@ spring:
     datasource:
         url: jdbc:mysql://localhost:3306/foxbase_db
         username: root
-        password: 1234
+        password: ${MYSQL_ROOT_PASSWORD}
     jpa:
         hibernate:
             ddl-auto: update
@@ -27,6 +27,17 @@ spring:
                     google:
                         authorization-uri: https://accounts.google.com/o/oauth2/auth
                         token-uri: https://oauth2.googleapis.com/token
+    mail:
+        port: 587
+        host: smtp.mail.com
+        username: ${APP_EMAIL}
+        password: ${APP_PASSWORD}
+        properties:
+          mail:
+              stmt:
+                  auth: true
+                  starttls:
+                      enable: true
 
 jwt:
     signerKey: ${SIGNER_KEY}

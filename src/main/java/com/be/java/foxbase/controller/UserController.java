@@ -5,7 +5,6 @@ import com.be.java.foxbase.dto.response.ApiResponse;
 import com.be.java.foxbase.dto.response.UserResponse;
 import com.be.java.foxbase.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

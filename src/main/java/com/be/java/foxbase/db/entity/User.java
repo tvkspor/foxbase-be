@@ -18,4 +18,5 @@ public class User {
     String fName;
     String lName;
     Double balance;
+    String avatar;
 }

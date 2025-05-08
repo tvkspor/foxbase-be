@@ -28,6 +28,15 @@ public class RatingController {
                 .build();
     }
 
+    @GetMapping("/my-rating")
+    ApiResponse<RatingResponse> getMyRating(
+            @RequestParam Long bookId
+    ) {
+        return ApiResponse.<RatingResponse>builder()
+                .data(ratingService.getMyRating(bookId))
+                .build();
+    }
+
     @PostMapping("/rate")
     ApiResponse<RatingResponse> createRating(@RequestBody RatingRequest ratingRequest){
         return ApiResponse.<RatingResponse>builder()

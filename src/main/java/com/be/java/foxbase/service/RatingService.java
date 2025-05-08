@@ -3,6 +3,7 @@ package com.be.java.foxbase.service;
 import com.be.java.foxbase.db.entity.Book;
 import com.be.java.foxbase.db.entity.Rating;
 import com.be.java.foxbase.db.entity.User;
+import com.be.java.foxbase.db.key.UserBookRatingId;
 import com.be.java.foxbase.dto.request.RatingRequest;
 import com.be.java.foxbase.dto.response.PaginatedResponse;
 import com.be.java.foxbase.dto.response.RatingResponse;
@@ -14,9 +15,8 @@ import com.be.java.foxbase.repository.RatingRepository;
 import com.be.java.foxbase.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class RatingService {
@@ -31,6 +31,10 @@ public class RatingService {
 
     @Autowired
     RatingMapper ratingMapper;
+
+    private String getCurrentUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
 
     public PaginatedResponse<RatingResponse> getBookRatings(Long bookId, Pageable pageable) {
         var ratings = ratingRepository.findByBook_BookId(bookId, pageable);
@@ -54,6 +58,13 @@ public class RatingService {
 
         Rating rating = ratingMapper.toRating(ratingRequest, creator, ratedBook);
         ratingRepository.save(ratingMapper.toRating(ratingRequest, creator, ratedBook));
+        return ratingMapper.toRatingResponse(rating);
+    }
+
+    public RatingResponse getMyRating(Long bookId){
+        Rating rating = ratingRepository.findByUserBookRatingId(new UserBookRatingId(getCurrentUsername(), bookId)).orElseThrow(
+                () -> new AppException(ErrorCode.RATING_NOT_FOUND)
+        );
         return ratingMapper.toRatingResponse(rating);
     }
 }

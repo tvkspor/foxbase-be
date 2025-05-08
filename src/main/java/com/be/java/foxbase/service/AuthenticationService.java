@@ -79,7 +79,7 @@ public class AuthenticationService {
 
         if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
-        var token = generateToken(user);
+        var token = generateToken(user.getUsername());
 
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
@@ -116,16 +116,16 @@ public class AuthenticationService {
         var user =
                 userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
-        var token = generateToken(user);
+        var token = generateToken(user.getUsername());
 
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
 
-    private String generateToken(User user) {
+    public String generateToken(String username) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername())
+                .subject(username)
                 .issuer("foxbase.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(

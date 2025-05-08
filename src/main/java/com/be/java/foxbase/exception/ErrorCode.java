@@ -18,6 +18,8 @@ public enum ErrorCode {
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     BOOK_NOT_FOUND(1009, "Book not found", HttpStatus.NOT_FOUND),
     RATING_NOT_FOUND(2001, "Rating not found", HttpStatus.NOT_FOUND),
+    UNMATCHED_EMAIL(2002, "Unmatched email", HttpStatus.BAD_REQUEST),
+    NO_SECURITY_OTP(2003, "No Security OTP", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

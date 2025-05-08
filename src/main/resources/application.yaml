@@ -12,8 +12,23 @@ spring:
         hibernate:
             ddl-auto: update
         show-sql: true
+    security:
+        oauth2:
+            client:
+                registration:
+                      google:
+                          client-id: ${GOOGLE_CLIENT_ID}
+                          client-secret: ${GOOGLE_CLIENT_SECRET}
+                          scope:
+                            - openid
+                            - email
+                            - profile
+                provider:
+                    google:
+                        authorization-uri: https://accounts.google.com/o/oauth2/auth
+                        token-uri: https://oauth2.googleapis.com/token
 
 jwt:
-    signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
+    signerKey: ${SIGNER_KEY}
     valid-duration: 3600 # in second
     refreshable-duration: 36000 # in seconds

@@ -1,9 +1,7 @@
 package com.be.java.foxbase.controller;
 
 import com.be.java.foxbase.dto.request.BookCreationRequest;
-import com.be.java.foxbase.dto.response.ApiResponse;
-import com.be.java.foxbase.dto.response.BookResponse;
-import com.be.java.foxbase.dto.response.PaginatedResponse;
+import com.be.java.foxbase.dto.response.*;
 import com.be.java.foxbase.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -87,6 +85,24 @@ public class BookController {
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.<PaginatedResponse<BookResponse>>builder()
                 .data(bookService.getFavoriteBooks(pageable))
+                .build();
+    }
+
+    @PostMapping("/favorites/toggle/{bookId}")
+    ApiResponse<ToggleFavoriteResponse> toggleFavorite(
+            @PathVariable Long bookId
+    ){
+        return ApiResponse.<ToggleFavoriteResponse>builder()
+                .data(bookService.toggleAddToFavoriteBooks(bookId))
+                .build();
+    }
+
+    @GetMapping("/favorites/check")
+    ApiResponse<InFavoriteResponse> check(
+            @RequestParam Long bookId
+    ){
+        return ApiResponse.<InFavoriteResponse>builder()
+                .data(bookService.checkInFavorite(bookId))
                 .build();
     }
 

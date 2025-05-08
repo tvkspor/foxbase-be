@@ -1,8 +1,15 @@
 package com.be.java.foxbase.service;
 
+import com.be.java.foxbase.db.entity.Book;
+import com.be.java.foxbase.db.entity.FavoriteBook;
+import com.be.java.foxbase.db.entity.PublishedBook;
+import com.be.java.foxbase.db.entity.User;
+import com.be.java.foxbase.db.key.UserBookId;
 import com.be.java.foxbase.dto.request.BookCreationRequest;
 import com.be.java.foxbase.dto.response.BookResponse;
+import com.be.java.foxbase.dto.response.InFavoriteResponse;
 import com.be.java.foxbase.dto.response.PaginatedResponse;
+import com.be.java.foxbase.dto.response.ToggleFavoriteResponse;
 import com.be.java.foxbase.exception.AppException;
 import com.be.java.foxbase.exception.ErrorCode;
 import com.be.java.foxbase.mapper.BookMapper;
@@ -40,7 +47,17 @@ public class BookService {
 
     public BookResponse publish(BookCreationRequest request){
         var book = bookMapper.toBook(request);
+
+        User publisher = userRepository.findByUsername(getCurrentUsername()).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXIST)
+        );
+
+        var publishedBook = new PublishedBook(new UserBookId(getCurrentUsername(), book.getBookId()), publisher, book);
+
+
         bookRepository.save(book);
+        publishedBookRepository.save(publishedBook);
+
         return bookMapper.toBookResponse(book);
     }
 
@@ -106,6 +123,47 @@ public class BookService {
                 .totalElements(books.getTotalElements())
                 .size(books.getSize())
                 .page(books.getNumber())
+                .build();
+    }
+
+    public InFavoriteResponse checkInFavorite(Long bookId) {
+        FavoriteBook favoriteBook = favoriteBookRepository.findById(new UserBookId(getCurrentUsername(), bookId)).orElse(null);
+        return InFavoriteResponse.builder()
+                .username(getCurrentUsername())
+                .bookId(bookId)
+                .isAdded(favoriteBook != null)
+                .build();
+    }
+
+    public ToggleFavoriteResponse toggleAddToFavoriteBooks(Long bookId) {
+        FavoriteBook favoriteBook = favoriteBookRepository.findById(new UserBookId(getCurrentUsername(), bookId)).orElse(null);
+
+        if (favoriteBook != null) {
+            favoriteBookRepository.delete(favoriteBook);
+            return ToggleFavoriteResponse.builder()
+                    .username(getCurrentUsername())
+                    .bookId(bookId)
+                    .isAdded(false)
+                    .message("Item has been removed from your favorite collection")
+                    .build();
+        }
+
+        Book book = bookRepository.findById(bookId).orElseThrow(
+                () -> new AppException(ErrorCode.BOOK_NOT_FOUND)
+        );
+
+        User user = userRepository.findByUsername(getCurrentUsername()).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXIST)
+        );
+
+        FavoriteBook favBook = new FavoriteBook(new UserBookId(getCurrentUsername(), bookId), user, book);
+        favoriteBookRepository.save(favBook);
+
+        return ToggleFavoriteResponse.builder()
+                .username(getCurrentUsername())
+                .bookId(bookId)
+                .isAdded(true)
+                .message("Item has been added to your favorite collection")
                 .build();
     }
 

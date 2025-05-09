@@ -27,7 +27,7 @@ public class UserMapper {
                 .lName(userCreationRequest.getLName())
                 .fName(userCreationRequest.getFName())
                 .password(userCreationRequest.getPassword())
-                .balance(0.0)
+                .balance(0L)
                 .build();
     }
 }

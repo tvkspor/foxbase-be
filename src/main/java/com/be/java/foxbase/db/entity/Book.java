@@ -21,6 +21,6 @@ public class Book {
     String contentUrl;
     String imageUrl;
     String genre;
-    Double price;
+    Long price;
     Double averageRating;
 }

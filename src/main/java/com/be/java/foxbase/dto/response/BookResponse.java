@@ -17,6 +17,6 @@ public class BookResponse {
     String contentUrl;
     String imageUrl;
     String genre;
-    Double price;
+    Long price;
     Double averageRating;
 }

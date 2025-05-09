@@ -17,6 +17,6 @@ public class User {
     String email;
     String fName;
     String lName;
-    Double balance;
+    Long balance;
     String avatar;
 }

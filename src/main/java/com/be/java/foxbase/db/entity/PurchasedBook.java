@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Builder
 @Data
@@ -24,4 +26,7 @@ public class PurchasedBook {
     @MapsId("bookId")
     @JoinColumn(name = "book_id")
     Book book;
+
+    boolean paid;
+    LocalDateTime paidAt;
 }

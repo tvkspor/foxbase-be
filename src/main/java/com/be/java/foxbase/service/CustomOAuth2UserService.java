@@ -56,7 +56,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .email(email)
                 .fName(fName)
                 .lName(lName)
-                .balance(0.0)
+                .balance(0L)
                 .avatar(picture)
                 .password("")
                 .build();

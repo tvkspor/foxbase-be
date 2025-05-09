@@ -17,7 +17,10 @@ public class Book {
 
     String title;
     String author;
+
+    @Lob
     String description;
+
     String contentUrl;
     String imageUrl;
     String genre;

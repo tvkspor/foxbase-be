@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -95,12 +96,13 @@ public class UserService {
             mailSender.send(message);
             return true;
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return false;
         }
     }
 
     public SendOTPResponse sendSecurityOTP(SendOTPRequest request) {
-        User user = userRepository.findByUsernameAndEmail(getCurrentUsername(), request.getEmail())
+        User user = userRepository.findByUsernameAndEmail(request.getUsername(), request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.UNMATCHED_EMAIL));
 
         Random generator = new Random();
@@ -119,8 +121,10 @@ public class UserService {
                         .otp(otp)
                         .otpExpiryTime(LocalDateTime.now().plusMinutes(5))
                         .resetToken("")
+                        .user(user)
                         .build();
             }
+            System.out.println(securityOTP);
             securityOTPRepository.save(securityOTP);
             return new SendOTPResponse(true);
         } else {
@@ -129,18 +133,18 @@ public class UserService {
     }
 
     public VerifyOTPResponse verifySecurityOTP(VerifyOTPRequest request) {
-        SecurityOTP securityOTP = securityOTPRepository.findByUser_username(getCurrentUsername())
+        SecurityOTP securityOTP = securityOTPRepository.findByUser_username(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.NO_SECURITY_OTP));
 
         if (request.getOtp() == securityOTP.getOtp()
                 && securityOTP.getOtpExpiryTime().isAfter(LocalDateTime.now())
         ){
-            var token = authenticationService.generateToken(getCurrentUsername());
-            securityOTP.setResetToken(token);
+            var resetKey = UUID.randomUUID().toString();
+            securityOTP.setResetToken(resetKey);
             securityOTP.setTokenExpiryTime(LocalDateTime.now().plusMinutes(15));
             securityOTPRepository.save(securityOTP);
             return VerifyOTPResponse.builder()
-                    .resetToken(token)
+                    .resetToken(resetKey)
                     .verified(true)
                     .build();
         } else {
@@ -152,13 +156,13 @@ public class UserService {
     }
 
     public ResetPasswordResponse resetPassword(ResetPasswordRequest request) {
-        SecurityOTP securityOTP = securityOTPRepository.findByUser_username(getCurrentUsername())
+        SecurityOTP securityOTP = securityOTPRepository.findByUser_username(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.NO_SECURITY_OTP));
 
         if (Objects.equals(securityOTP.getResetToken(), request.getResetToken())
                 && securityOTP.getTokenExpiryTime().isAfter(LocalDateTime.now()))
         {
-            User user = userRepository.findByUsername(getCurrentUsername()).orElseThrow(
+            User user = userRepository.findByUsername(request.getUsername()).orElseThrow(
                     () -> new AppException(ErrorCode.USER_NOT_EXIST)
             );
             user.setPassword(passwordEncoder.encode(request.getPassword()));

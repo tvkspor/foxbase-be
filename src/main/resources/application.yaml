@@ -29,12 +29,12 @@ spring:
                         token-uri: https://oauth2.googleapis.com/token
     mail:
         port: 587
-        host: smtp.mail.com
+        host: smtp.gmail.com
         username: ${APP_EMAIL}
         password: ${APP_PASSWORD}
         properties:
           mail:
-              stmt:
+              smtp:
                   auth: true
                   starttls:
                       enable: true

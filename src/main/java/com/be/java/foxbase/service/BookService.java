@@ -67,7 +67,7 @@ public class BookService {
     }
 
     public PaginatedResponse<BookResponse> getBooksByGenre(String genre, Pageable pageable) {
-        var books = bookRepository.findByGenre(genre, pageable);
+        var books = bookRepository.findByGenreContaining(genre, pageable);
         var bookResponses = books.map(bookMapper::toBookResponse);
         return PaginatedResponse.<BookResponse>builder()
                         .content(bookResponses.toList())
@@ -79,7 +79,7 @@ public class BookService {
     }
 
     public PaginatedResponse<BookResponse> getBooksByAuthor(String author, Pageable pageable) {
-        var books = bookRepository.findByAuthor(author, pageable);
+        var books = bookRepository.findByAuthorContaining(author, pageable);
         var bookResponses = books.map(bookMapper::toBookResponse);
         return PaginatedResponse.<BookResponse>builder()
                 .content(bookResponses.toList())
@@ -91,7 +91,7 @@ public class BookService {
     }
 
     public PaginatedResponse<BookResponse> getBooksByTitle(String title, Pageable pageable) {
-        var books = bookRepository.findByTitle(title, pageable);
+        var books = bookRepository.findByTitleContaining(title, pageable);
         var bookResponses = books.map(bookMapper::toBookResponse);
         return PaginatedResponse.<BookResponse>builder()
                 .content(bookResponses.toList())

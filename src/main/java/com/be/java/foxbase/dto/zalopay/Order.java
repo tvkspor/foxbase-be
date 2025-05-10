@@ -16,5 +16,4 @@ public class Order {
     String embeddata;
     String item;
     String mac;
-    String callback_url;
 }

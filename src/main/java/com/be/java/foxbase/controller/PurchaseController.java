@@ -20,8 +20,16 @@ public class PurchaseController {
 
     @PostMapping("book/zalo-pay/create-order")
     ApiResponse<ZaloPayOrderResponse> createZaloPayOrder(@RequestBody ZaloPayOrderRequest zaloPayOrderRequest) {
+        var response = purchaseService.createOrder(zaloPayOrderRequest);
+
+        if (response.getFirst() == -1){
+            return ApiResponse.<ZaloPayOrderResponse>builder()
+                    .data(null)
+                    .message("Please pay your current order before creating a new one.")
+                    .build();
+        }
         return ApiResponse.<ZaloPayOrderResponse>builder()
-                .data(purchaseService.createOrder(zaloPayOrderRequest))
+                .data(response.getSecond())
                 .build();
     }
 

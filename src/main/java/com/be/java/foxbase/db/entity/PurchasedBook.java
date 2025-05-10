@@ -28,5 +28,7 @@ public class PurchasedBook {
     Book book;
 
     boolean paid;
+
+    LocalDateTime createdAt;
     LocalDateTime paidAt;
 }

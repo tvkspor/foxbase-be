@@ -1,7 +1,6 @@
 package com.be.java.foxbase.configuration;
 
 import com.be.java.foxbase.handler.GoogleAuthSuccessHandler;
-import com.be.java.foxbase.service.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,35 +34,26 @@ public class SecurityConfig {
     private CustomJwtDecoder customJwtDecoder;
 
     @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
-
-    @Autowired
     private GoogleAuthSuccessHandler googleAuthSuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(
-                request -> request
-                        .requestMatchers(HttpMethod.POST, PUBLIC_AUTH_ENDPOINTS)
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, PUBLIC_EXPLORE_ENDPOINTS)
-                        .permitAll()
-                .anyRequest()
-                .authenticated())
-        .oauth2ResourceServer(
-                oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
-                        .decoder(customJwtDecoder)
-                        .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                .authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) // Custom OAuth2UserService if needed
+        httpSecurity
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(HttpMethod.POST, PUBLIC_AUTH_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_EXPLORE_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 ->
+                        oauth2.successHandler(googleAuthSuccessHandler))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwtConfigurer -> jwtConfigurer
+                                .decoder(customJwtDecoder)
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
                         )
-                        .successHandler(googleAuthSuccessHandler) // Optional: handle successful login
-                );
-
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
-
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                )
+                .csrf(AbstractHttpConfigurer::disable);
 
         return httpSecurity.build();
     }

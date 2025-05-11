@@ -15,6 +15,7 @@ import com.be.java.foxbase.exception.ErrorCode;
 import com.be.java.foxbase.mapper.BookMapper;
 import com.be.java.foxbase.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,9 @@ public class BookService {
     @Autowired
     BookMapper bookMapper;
 
+    @Autowired
+    private RatingRepository ratingRepository;
+
     private String getCurrentUsername() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
@@ -66,64 +70,57 @@ public class BookService {
         return bookMapper.toBookResponse(book);
     }
 
+    private PaginatedResponse<BookResponse> buildPaginatedBookResponse(Page<Book> books) {
+        var bookResponses = books.map(bookMapper::toBookResponse);
+        return toPaginatedResponse(books, bookResponses);
+    }
+
+    private PaginatedResponse<BookResponse> buildPaginatedBookResponseWithRating(Page<Book> books) {
+        var bookResponses = books.map(book -> {
+            var response = bookMapper.toBookResponse(book);
+            var avgRating = ratingRepository.findBookAverageRating(book.getBookId());
+            response.setAverageRating(avgRating);
+            return response;
+        });
+        return toPaginatedResponse(books, bookResponses);
+    }
+
+    private <T> PaginatedResponse<T> toPaginatedResponse(Page<?> sourcePage, Page<T> mappedPage) {
+        return PaginatedResponse.<T>builder()
+                .content(mappedPage.toList())
+                .totalPages(sourcePage.getTotalPages())
+                .totalElements(sourcePage.getTotalElements())
+                .size(sourcePage.getSize())
+                .page(sourcePage.getNumber())
+                .build();
+    }
+
+
     public PaginatedResponse<BookResponse> getBooksByGenre(String genre, Pageable pageable) {
         var books = bookRepository.findByGenreContaining(genre, pageable);
-        var bookResponses = books.map(bookMapper::toBookResponse);
-        return PaginatedResponse.<BookResponse>builder()
-                        .content(bookResponses.toList())
-                        .totalPages(books.getTotalPages())
-                        .totalElements(books.getTotalElements())
-                        .size(books.getSize())
-                        .page(books.getNumber())
-                        .build();
+        return buildPaginatedBookResponse(books);
     }
 
     public PaginatedResponse<BookResponse> getBooksByAuthor(String author, Pageable pageable) {
         var books = bookRepository.findByAuthorContaining(author, pageable);
-        var bookResponses = books.map(bookMapper::toBookResponse);
-        return PaginatedResponse.<BookResponse>builder()
-                .content(bookResponses.toList())
-                .totalPages(books.getTotalPages())
-                .totalElements(books.getTotalElements())
-                .size(books.getSize())
-                .page(books.getNumber())
-                .build();
+        return buildPaginatedBookResponse(books);
     }
 
     public PaginatedResponse<BookResponse> getBooksByTitle(String title, Pageable pageable) {
         var books = bookRepository.findByTitleContaining(title, pageable);
-        var bookResponses = books.map(bookMapper::toBookResponse);
-        return PaginatedResponse.<BookResponse>builder()
-                .content(bookResponses.toList())
-                .totalPages(books.getTotalPages())
-                .totalElements(books.getTotalElements())
-                .size(books.getSize())
-                .page(books.getNumber())
-                .build();
+        return buildPaginatedBookResponse(books);
     }
 
     public PaginatedResponse<BookResponse> getMyBooks(Pageable pageable) {
-        var books = publishedBookRepository.findByUser_Username(getCurrentUsername(), pageable);
-        var bookResponses = books.map(item -> bookMapper.toBookResponse(item.getBook()));
-        return PaginatedResponse.<BookResponse>builder()
-                .content(bookResponses.toList())
-                .totalPages(books.getTotalPages())
-                .totalElements(books.getTotalElements())
-                .size(books.getSize())
-                .page(books.getNumber())
-                .build();
+        var books = publishedBookRepository.findByUser_Username(getCurrentUsername(), pageable)
+                .map(PublishedBook::getBook);
+        return buildPaginatedBookResponseWithRating(books);
     }
 
     public PaginatedResponse<BookResponse> getFavoriteBooks(Pageable pageable) {
-        var books = favoriteBookRepository.findByUser_Username(getCurrentUsername(), pageable);
-        var bookResponses = books.map(item -> bookMapper.toBookResponse(item.getBook()));
-        return PaginatedResponse.<BookResponse>builder()
-                .content(bookResponses.toList())
-                .totalPages(books.getTotalPages())
-                .totalElements(books.getTotalElements())
-                .size(books.getSize())
-                .page(books.getNumber())
-                .build();
+        var books = favoriteBookRepository.findByUser_Username(getCurrentUsername(), pageable)
+                .map(FavoriteBook::getBook);
+        return buildPaginatedBookResponseWithRating(books);
     }
 
     public InFavoriteResponse checkInFavorite(Long bookId) {

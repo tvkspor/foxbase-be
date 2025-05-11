@@ -17,6 +17,8 @@ import com.be.java.foxbase.utils.InteractionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class InteractionService {
     @Autowired
@@ -46,11 +48,8 @@ public class InteractionService {
         Interaction interaction = interactionRepository.findById(interactionId).orElse(null);
 
         if (interaction == null) {
-            applyRatingChange(rating, request.getAction(), +1);
             interaction = interactionMapper.toInteraction(request, interactUser, rating);
         } else {
-            applyRatingChange(rating, interaction.getAction(), -1); // undo previous
-            applyRatingChange(rating, request.getAction(), +1);     // apply new
             interaction.setAction(request.getAction());
         }
 
@@ -59,12 +58,36 @@ public class InteractionService {
         return interactionMapper.toInteractionResponse(interaction);
     }
 
-    private void applyRatingChange(Rating rating, InteractionType action, int delta) {
-        switch (action) {
-            case LIKE -> rating.setLikes(rating.getLikes() + delta);
-            case DISLIKE -> rating.setDislikes(rating.getDislikes() + delta);
-            case LOVE -> rating.setLoves(rating.getLoves() + delta);
-        }
-    }
+    public Map<InteractionType, Integer> countInteractions(InteractionRequest request) {
+        var like = interactionRepository.countInteraction(
+                InteractionType.LIKE,
+                request.getCreatorUsername(),
+                request.getInteractUsername(),
+                request.getRatedBookId()
+        );
+        var dislike = interactionRepository.countInteraction(
+                InteractionType.DISLIKE,
+                request.getCreatorUsername(),
+                request.getInteractUsername(),
+                request.getRatedBookId()
+        );
+        var love = interactionRepository.countInteraction(
+                InteractionType.LOVE,
+                request.getCreatorUsername(),
+                request.getInteractUsername(),
+                request.getRatedBookId()
+        );
 
+        Rating rating = ratingRepository.findByUserBookRatingId(new UserBookRatingId(request.getCreatorUsername(), request.getRatedBookId())).orElseThrow(
+                () -> new AppException(ErrorCode.RATING_NOT_FOUND)
+        );
+
+        rating.setLikes(like);
+        rating.setDislikes(dislike);
+        rating.setLoves(love);
+
+        ratingRepository.save(rating);
+
+        return Map.of(InteractionType.LIKE, like, InteractionType.DISLIKE, dislike, InteractionType.LOVE, love);
+    }
 }

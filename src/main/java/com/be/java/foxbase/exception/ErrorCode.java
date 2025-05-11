@@ -20,6 +20,7 @@ public enum ErrorCode {
     RATING_NOT_FOUND(2001, "Rating not found", HttpStatus.NOT_FOUND),
     UNMATCHED_EMAIL(2002, "Unmatched email", HttpStatus.BAD_REQUEST),
     NO_SECURITY_OTP(2003, "No Security OTP", HttpStatus.BAD_REQUEST),
+    EMAIL_ALREADY_USED(2004, "Email already used", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

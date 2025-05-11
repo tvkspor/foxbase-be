@@ -53,7 +53,6 @@ public class InteractionService {
             interaction.setAction(request.getAction());
         }
 
-        ratingRepository.save(rating);
         interactionRepository.save(interaction);
         return interactionMapper.toInteractionResponse(interaction);
     }

@@ -67,7 +67,12 @@ public class BookService {
 
     public BookResponse getBookById(Long id){
         var book = bookRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
-        return bookMapper.toBookResponse(book);
+        var response = bookMapper.toBookResponse(book);
+        var avgRating = ratingRepository.findBookAverageRating(book.getBookId());
+        response.setAverageRating(avgRating);
+        book.setAverageRating(avgRating);
+        bookRepository.save(book);
+        return response;
     }
 
     private PaginatedResponse<BookResponse> buildPaginatedBookResponse(Page<Book> books) {
@@ -80,6 +85,8 @@ public class BookService {
             var response = bookMapper.toBookResponse(book);
             var avgRating = ratingRepository.findBookAverageRating(book.getBookId());
             response.setAverageRating(avgRating);
+            book.setAverageRating(avgRating);
+            bookRepository.save(book);
             return response;
         });
         return toPaginatedResponse(books, bookResponses);

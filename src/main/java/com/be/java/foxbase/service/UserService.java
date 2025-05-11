@@ -60,6 +60,11 @@ public class UserService {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
+        User dbUser = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if (dbUser != null) {
+            throw new AppException(ErrorCode.EMAIL_ALREADY_USED);
+        }
+
         try {
             userRepository.save(user);
         } catch (DataIntegrityViolationException e){

@@ -5,8 +5,6 @@ import com.be.java.foxbase.dto.response.UserResponse;
 import com.be.java.foxbase.db.entity.User;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
 
 @Component
 public class UserMapper {
@@ -17,6 +15,7 @@ public class UserMapper {
                 .lName(user.getLName())
                 .fName(user.getFName())
                 .balance(user.getBalance())
+                .avatarUrl(user.getAvatar())
                 .build();
     }
 

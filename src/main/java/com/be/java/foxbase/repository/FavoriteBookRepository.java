@@ -12,5 +12,5 @@ import java.util.Optional;
 
 @Repository
 public interface FavoriteBookRepository extends JpaRepository<FavoriteBook, UserBookId> {
-    Page<FavoriteBook> findByUser_Username(String username, Pageable pageable);
+    List<FavoriteBook> findByUser_Username(String username);
 }

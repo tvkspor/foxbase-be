@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RatingResponse {
     String creatorUsername;
+    String creatorFName;
+    String creatorLName;
+    String creatorAvatar;
     Long ratedBookId;
     Double rate;
     Integer likes;

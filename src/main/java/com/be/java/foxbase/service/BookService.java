@@ -14,13 +14,19 @@ import com.be.java.foxbase.exception.AppException;
 import com.be.java.foxbase.exception.ErrorCode;
 import com.be.java.foxbase.mapper.BookMapper;
 import com.be.java.foxbase.repository.*;
+import com.be.java.foxbase.utils.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -102,39 +108,20 @@ public class BookService {
                 .build();
     }
 
-
-    public PaginatedResponse<BookResponse> getBooksByGenre(String genre, Pageable pageable) {
-        var books = bookRepository.findByGenreContaining(genre, pageable);
-        return buildPaginatedBookResponse(books);
-    }
-
-    public PaginatedResponse<BookResponse> getBooksByAuthor(String author, Pageable pageable) {
-        var books = bookRepository.findByAuthorContaining(author, pageable);
-        return buildPaginatedBookResponse(books);
-    }
-
-    public PaginatedResponse<BookResponse> getBooksByTitle(String title, Pageable pageable) {
-        var books = bookRepository.findByTitleContaining(title, pageable);
-        return buildPaginatedBookResponse(books);
-    }
-
     public PaginatedResponse<BookResponse> getMyBooks(Pageable pageable) {
         var books = publishedBookRepository.findByUser_Username(getCurrentUsername(), pageable)
                 .map(PublishedBook::getBook);
         return buildPaginatedBookResponseWithRating(books);
     }
 
-    public PaginatedResponse<BookResponse> getFavoriteBooks(Pageable pageable) {
-        var books = favoriteBookRepository.findByUser_Username(getCurrentUsername(), pageable)
-                .map(FavoriteBook::getBook);
-        return buildPaginatedBookResponseWithRating(books);
+    public List<BookResponse> getFavoriteBooks() {
+        var books = favoriteBookRepository.findByUser_Username(getCurrentUsername());
+        return books.stream().map(item -> bookMapper.toBookResponse(item.getBook())).collect(Collectors.toList());
     }
 
     public InFavoriteResponse checkInFavorite(Long bookId) {
         FavoriteBook favoriteBook = favoriteBookRepository.findById(new UserBookId(getCurrentUsername(), bookId)).orElse(null);
         return InFavoriteResponse.builder()
-                .username(getCurrentUsername())
-                .bookId(bookId)
                 .isAdded(favoriteBook != null)
                 .build();
     }
@@ -176,4 +163,96 @@ public class BookService {
         var bookResponses = books.stream().map(item -> item.getId().getBookId());
         return bookResponses.toList();
     }
+
+    public List<BookResponse> get6FreeBooks(){
+        var books = bookRepository.findTop6ByPriceEquals(0L);
+        return books.stream().map(bookMapper::toBookResponse).toList();
+    }
+
+    public List<BookResponse> get6CostBooks(){
+        var books = bookRepository.findTop6ByPriceGreaterThan(0L);
+        return books.stream().map(bookMapper::toBookResponse).toList();
+    }
+
+    public List<BookResponse> get6CommunityBooks(){
+        var books = publishedBookRepository.findTop6By();
+        var actualBooks = books.stream().map(PublishedBook::getBook).toList();
+        return actualBooks.stream().map(bookMapper::toBookResponse).toList();
+    }
+
+    private List<Book> getFreeBooks(List<Book> input){
+        return input.stream().filter(book -> book.getPrice() == 0).collect(Collectors.toList());
+    }
+
+    private List<Book> getCostBooks(List<Book> input){
+        return input.stream().filter(book -> book.getPrice() > 0).collect(Collectors.toList());
+    }
+
+    private List<Book> getByTitleContaining(List<Book> input, String title){
+        if (title == null) return input;
+        return input.stream().filter(book ->
+                book.getTitle().toLowerCase()
+                        .contains(title.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    private List<Book> getByAuthorContaining(List<Book> input, String author){
+        if (author == null) return input;
+        return input.stream().filter(book ->
+                book.getAuthor().toLowerCase()
+                        .contains(author.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    private List<Book> getByGenreContaining(List<Book> input, String genre){
+        if (genre == null) return input;
+        return input.stream().filter(book ->
+                book.getGenre().toLowerCase()
+                        .contains(genre.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    private List<Book> applyFilter(List<Book> books, Filter filter, String opt) {
+        return switch (filter) {
+            case TITLE -> getByTitleContaining(books, opt);
+            case AUTHOR -> getByAuthorContaining(books, opt);
+            case GENRE -> getByGenreContaining(books, opt);
+            case FREE -> getFreeBooks(books);
+            case COST -> getCostBooks(books);
+            default -> books;
+        };
+    }
+
+    public Page<Book> convertListToPage(List<Book> books, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), books.size());
+
+        List<Book> subList = books.subList(start, end);
+        return new PageImpl<>(subList, pageable, books.size());
+    }
+
+    public PaginatedResponse<BookResponse> getBooksByFilterList(Filter[] filters, String input, Pageable pageable) {
+        boolean outsourceApplied = Arrays.stream(filters).anyMatch(filter -> filter == Filter.OUTSOURCE);
+        filters = Arrays.stream(filters).filter(Objects::nonNull).toArray(Filter[]::new);
+
+        if (outsourceApplied) {
+            var books = publishedBookRepository
+                    .findAll().stream()
+                    .map(PublishedBook::getBook)
+                    .collect(Collectors.toList());
+            for (Filter filter : filters) {
+                books = applyFilter(books, filter, input);
+            }
+            var responses = books.stream().map(bookMapper::toBookResponse).toList();
+            return buildPaginatedBookResponse(convertListToPage(books, pageable));
+        } else {
+            var books = bookRepository.findAll();
+            for (Filter filter : filters) {
+                books = applyFilter(books, filter, input);
+            }
+            var responses = books.stream().map(bookMapper::toBookResponse).toList();
+            return buildPaginatedBookResponse(convertListToPage(books, pageable));
+        }
+    }
+
 }

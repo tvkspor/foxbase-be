@@ -60,17 +60,18 @@ public class UserService {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        User dbUser = userRepository.findByEmail(request.getEmail()).orElse(null);
-        if (dbUser != null) {
-            throw new AppException(ErrorCode.EMAIL_ALREADY_USED);
-        }
+        boolean existUsername = userRepository.existsById(request.getUsername());
+        boolean existMail = userRepository.existsByEmail(request.getEmail());
 
-        try {
-            userRepository.save(user);
-        } catch (DataIntegrityViolationException e){
+        if (existUsername) {
             throw new AppException(ErrorCode.USER_EXIST);
         }
 
+        if (existMail) {
+            throw new AppException(ErrorCode.EMAIL_ALREADY_USED);
+        }
+
+        userRepository.save(user);
         return userMapper.toUserResponse(user);
     }
 
@@ -115,26 +116,30 @@ public class UserService {
 
         var success = sendOTP(otp, request.getEmail(), user.getFName() + " " + user.getLName());
 
-        if (success){
-            SecurityOTP securityOTP = securityOTPRepository.findByUser_username(getCurrentUsername()).orElse(null);
+        if (success) {
+            SecurityOTP securityOTP = securityOTPRepository.findByUser_username(request.getUsername()).orElse(null);
 
-            if (securityOTP != null){
+            if (securityOTP != null) {
                 securityOTP.setOtp(otp);
                 securityOTP.setOtpExpiryTime(LocalDateTime.now().plusMinutes(5));
+                securityOTP.setResetToken("");
+                // tokenExpiryTime optional if not used here
             } else {
                 securityOTP = SecurityOTP.builder()
                         .otp(otp)
                         .otpExpiryTime(LocalDateTime.now().plusMinutes(5))
                         .resetToken("")
+                        .tokenExpiryTime(null)
                         .user(user)
                         .build();
             }
-            System.out.println(securityOTP);
+
             securityOTPRepository.save(securityOTP);
             return new SendOTPResponse(true);
         } else {
             return new SendOTPResponse(false);
         }
+
     }
 
     public VerifyOTPResponse verifySecurityOTP(VerifyOTPRequest request) {

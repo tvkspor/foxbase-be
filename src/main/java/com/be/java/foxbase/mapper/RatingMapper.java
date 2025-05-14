@@ -13,6 +13,22 @@ import java.util.Date;
 
 @Component
 public class RatingMapper {
+    public RatingResponse toRatingResponse(Rating rating, User user){
+        return RatingResponse.builder()
+                .creatorUsername(rating.getUser().getUsername())
+                .creatorFName(user.getFName())
+                .creatorLName(user.getLName())
+                .creatorAvatar(user.getAvatar())
+                .ratedBookId(rating.getUserBookRatingId().getRatedBookId())
+                .rate(rating.getRate())
+                .loves(rating.getLoves())
+                .likes(rating.getLikes())
+                .dislikes(rating.getDislikes())
+                .comment(rating.getComment())
+                .createdAt(rating.getCreatedAt())
+                .build();
+    }
+
     public RatingResponse toRatingResponse(Rating rating){
         return RatingResponse.builder()
                 .creatorUsername(rating.getUser().getUsername())

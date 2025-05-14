@@ -1,9 +1,11 @@
 package com.be.java.foxbase.controller;
 
 import com.be.java.foxbase.dto.request.BookCreationRequest;
+import com.be.java.foxbase.dto.request.BookFilterRequest;
 import com.be.java.foxbase.dto.response.*;
 import com.be.java.foxbase.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -30,46 +32,22 @@ public class BookController {
                 .build();
     }
 
-    @GetMapping("/genre")
-    ApiResponse<PaginatedResponse<BookResponse>> getByGenre(
-            @RequestParam String genre,
+    @PostMapping("/filter")
+    ApiResponse<PaginatedResponse<BookResponse>> getByFilter(
+            @RequestBody BookFilterRequest request,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "10") int size
     ){
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.<PaginatedResponse<BookResponse>>builder()
-                .data(bookService.getBooksByGenre(genre, pageable))
-                .build();
-    }
-
-    @GetMapping("/title")
-    ApiResponse<PaginatedResponse<BookResponse>> getByTitle(
-            @RequestParam String title,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ){
-        Pageable pageable = PageRequest.of(page, size);
-        return ApiResponse.<PaginatedResponse<BookResponse>>builder()
-                .data(bookService.getBooksByTitle(title, pageable))
-                .build();
-    }
-
-    @GetMapping("/author")
-    ApiResponse<PaginatedResponse<BookResponse>> getByAuthor(
-            @RequestParam String author,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ){
-        Pageable pageable = PageRequest.of(page, size);
-        return ApiResponse.<PaginatedResponse<BookResponse>>builder()
-                .data(bookService.getBooksByAuthor(author, pageable))
+                .data(bookService.getBooksByFilterList(request.getFilters(), request.getKeyword(), pageable))
                 .build();
     }
 
     @GetMapping("/collection")
     ApiResponse<PaginatedResponse<BookResponse>> getMyCollection(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "10") int size
     ){
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.<PaginatedResponse<BookResponse>>builder()
@@ -78,13 +56,9 @@ public class BookController {
     }
 
     @GetMapping("/favorites")
-    ApiResponse<PaginatedResponse<BookResponse>> getMyFavorites(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ){
-        Pageable pageable = PageRequest.of(page, size);
-        return ApiResponse.<PaginatedResponse<BookResponse>>builder()
-                .data(bookService.getFavoriteBooks(pageable))
+    ApiResponse<List<BookResponse>> getMyFavorites(){
+        return ApiResponse.<List<BookResponse>>builder()
+                .data(bookService.getFavoriteBooks())
                 .build();
     }
 
@@ -110,6 +84,27 @@ public class BookController {
     ApiResponse<List<Long>> getPurchasedBookIds(){
         return ApiResponse.<List<Long>>builder()
                 .data(bookService.getPurchasedBookIds())
+                .build();
+    }
+
+    @GetMapping("/free6")
+    ApiResponse<List<BookResponse>> getFree6Books(){
+        return ApiResponse.<List<BookResponse>>builder()
+                .data(bookService.get6FreeBooks())
+                .build();
+    }
+
+    @GetMapping("/cost6")
+    ApiResponse<List<BookResponse>> getCost6Books(){
+        return ApiResponse.<List<BookResponse>>builder()
+                .data(bookService.get6CostBooks())
+                .build();
+    }
+
+    @GetMapping("/comm6")
+    ApiResponse<List<BookResponse>> getComm6Books(){
+        return ApiResponse.<List<BookResponse>>builder()
+                .data(bookService.get6CommunityBooks())
                 .build();
     }
  }

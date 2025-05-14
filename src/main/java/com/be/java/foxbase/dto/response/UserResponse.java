@@ -15,6 +15,7 @@ public class UserResponse {
     String email;
     String fName;
     String lName;
+    String avatarUrl;
     Long balance;
     List<Long> myBooks;
     List<Long> myFavorites;

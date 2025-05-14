@@ -17,7 +17,10 @@ public interface RatingRepository extends JpaRepository<Rating, UserBookRatingId
     Page<Rating> findByBook_BookId(Long id, Pageable pageable);
     Optional<Rating> findByUserBookRatingId(UserBookRatingId id);
     List<Rating> findByBook_BookId(Long id);
+    long countByBook_BookId(Long id);
 
     @Query("SELECT AVG(r.rate) FROM Rating r WHERE r.book.bookId = :id ")
     Double findBookAverageRating(@Param("id") Long id);
+
+
 }

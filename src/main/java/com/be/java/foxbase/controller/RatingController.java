@@ -44,4 +44,11 @@ public class RatingController {
                 .build();
     }
 
+    @GetMapping("/count")
+    ApiResponse<Long> getCount(@RequestParam Long bookId){
+        return ApiResponse.<Long>builder()
+                .data(ratingService.countingBookRating(bookId))
+                .build();
+    }
+
 }

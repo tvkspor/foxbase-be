@@ -38,8 +38,12 @@ public class RatingService {
 
     public PaginatedResponse<RatingResponse> getBookRatings(Long bookId, Pageable pageable) {
         var ratings = ratingRepository.findByBook_BookId(bookId, pageable);
+        var responses = ratings.stream().map(item -> {
+            var user = item.getUser();
+            return ratingMapper.toRatingResponse(item, user);
+        }).toList();
         return PaginatedResponse.<RatingResponse>builder()
-                .content(ratings.map(ratingMapper::toRatingResponse).toList())
+                .content(responses)
                 .totalElements(ratings.getTotalElements())
                 .totalPages(ratings.getTotalPages())
                 .size(ratings.getSize())
@@ -66,5 +70,9 @@ public class RatingService {
                 () -> new AppException(ErrorCode.RATING_NOT_FOUND)
         );
         return ratingMapper.toRatingResponse(rating);
+    }
+
+    public Long countingBookRating(Long bookId){
+        return ratingRepository.countByBook_BookId(bookId);
     }
 }

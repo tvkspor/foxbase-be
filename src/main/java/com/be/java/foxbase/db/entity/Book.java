@@ -25,5 +25,5 @@ public class Book {
     String imageUrl;
     String genre;
     Long price;
-    Double averageRating;
+    Double averageRating = 0.0;
 }

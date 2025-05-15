@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,7 +74,7 @@ public class BookService {
         var book = bookRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
         var response = bookMapper.toBookResponse(book);
         var avgRating = ratingRepository.findBookAverageRating(book.getBookId());
-        response.setAverageRating(avgRating);
+        response.setAverageRating(avgRating != null ? avgRating : 0);
         book.setAverageRating(avgRating);
         bookRepository.save(book);
         return response;
@@ -108,10 +107,9 @@ public class BookService {
                 .build();
     }
 
-    public PaginatedResponse<BookResponse> getMyBooks(Pageable pageable) {
-        var books = publishedBookRepository.findByUser_Username(getCurrentUsername(), pageable)
-                .map(PublishedBook::getBook);
-        return buildPaginatedBookResponseWithRating(books);
+    public List<BookResponse> getMyBooks() {
+        var books = publishedBookRepository.findByUser_Username(getCurrentUsername());
+        return books.stream().map(item -> bookMapper.toBookResponse(item.getBook())).collect(Collectors.toList());
     }
 
     public List<BookResponse> getFavoriteBooks() {

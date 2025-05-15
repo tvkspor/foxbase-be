@@ -146,7 +146,7 @@ public class PurchaseService {
         Map<String,String> embeddata = new HashMap<>(){
             {
                 put("merchantinfo","fox-base");
-                put("redirecturl", "http://localhost:8080/foxbase-be");
+                put("redirecturl", "http://localhost:5173/book/detail");
             }
         };
 

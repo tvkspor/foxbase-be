@@ -45,13 +45,9 @@ public class BookController {
     }
 
     @GetMapping("/collection")
-    ApiResponse<PaginatedResponse<BookResponse>> getMyCollection(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ){
-        Pageable pageable = PageRequest.of(page, size);
-        return ApiResponse.<PaginatedResponse<BookResponse>>builder()
-                .data(bookService.getMyBooks(pageable))
+    ApiResponse<List<BookResponse>> getMyCollection(){
+        return ApiResponse.<List<BookResponse>>builder()
+                .data(bookService.getMyBooks())
                 .build();
     }
 

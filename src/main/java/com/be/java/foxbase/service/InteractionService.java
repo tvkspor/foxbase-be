@@ -6,6 +6,7 @@ import com.be.java.foxbase.db.entity.User;
 import com.be.java.foxbase.db.key.InteractionId;
 import com.be.java.foxbase.db.key.UserBookRatingId;
 import com.be.java.foxbase.dto.request.InteractionRequest;
+import com.be.java.foxbase.dto.request.UserInteractionRequest;
 import com.be.java.foxbase.dto.response.InteractionResponse;
 import com.be.java.foxbase.exception.AppException;
 import com.be.java.foxbase.exception.ErrorCode;
@@ -15,6 +16,7 @@ import com.be.java.foxbase.repository.RatingRepository;
 import com.be.java.foxbase.repository.UserRepository;
 import com.be.java.foxbase.utils.InteractionType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -33,8 +35,12 @@ public class InteractionService {
     @Autowired
     RatingRepository ratingRepository;
 
+    private String getCurrentUsername(){
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
     public InteractionResponse interact(InteractionRequest request) {
-        User interactUser = userRepository.findByUsername(request.getInteractUsername())
+        User interactUser = userRepository.findByUsername(getCurrentUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
 
         UserBookRatingId ratingId = new UserBookRatingId(request.getCreatorUsername(), request.getRatedBookId());
@@ -42,38 +48,40 @@ public class InteractionService {
                 .orElseThrow(() -> new AppException(ErrorCode.RATING_NOT_FOUND));
 
         InteractionId interactionId = new InteractionId(
-                request.getInteractUsername(), request.getCreatorUsername(), request.getRatedBookId()
+                getCurrentUsername(), request.getCreatorUsername(), request.getRatedBookId()
         );
 
         Interaction interaction = interactionRepository.findById(interactionId).orElse(null);
 
+        boolean flag = false;
+
         if (interaction == null) {
             interaction = interactionMapper.toInteraction(request, interactUser, rating);
         } else {
-            interaction.setAction(request.getAction());
+            if (interaction.getAction() == request.getAction()) flag = true;
+            else interaction.setAction(request.getAction());
         }
 
-        interactionRepository.save(interaction);
+        if (flag) interactionRepository.delete(interaction);
+        else interactionRepository.save(interaction);
+
         return interactionMapper.toInteractionResponse(interaction);
     }
 
-    public Map<InteractionType, Integer> countInteractions(InteractionRequest request) {
+    public Map<InteractionType, Integer> countInteractions(UserInteractionRequest request) {
         var like = interactionRepository.countInteraction(
                 InteractionType.LIKE,
                 request.getCreatorUsername(),
-                request.getInteractUsername(),
                 request.getRatedBookId()
         );
         var dislike = interactionRepository.countInteraction(
                 InteractionType.DISLIKE,
                 request.getCreatorUsername(),
-                request.getInteractUsername(),
                 request.getRatedBookId()
         );
         var love = interactionRepository.countInteraction(
                 InteractionType.LOVE,
                 request.getCreatorUsername(),
-                request.getInteractUsername(),
                 request.getRatedBookId()
         );
 
@@ -88,5 +96,13 @@ public class InteractionService {
         ratingRepository.save(rating);
 
         return Map.of(InteractionType.LIKE, like, InteractionType.DISLIKE, dislike, InteractionType.LOVE, love);
+    }
+
+    public InteractionType getMyInteraction(UserInteractionRequest request) {
+        Interaction interaction = interactionRepository.findById(new InteractionId(getCurrentUsername(),
+                                                                request.getCreatorUsername(),
+                                                                request.getRatedBookId()))
+                                                .orElse(null);
+        return interaction != null ? interaction.getAction() : InteractionType.NONE;
     }
 }

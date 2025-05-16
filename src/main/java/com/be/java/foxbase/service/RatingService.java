@@ -52,7 +52,7 @@ public class RatingService {
     }
 
     public RatingResponse createRating(RatingRequest ratingRequest){
-        User creator = userRepository.findByUsername(ratingRequest.getCreatorUsername()).orElseThrow(
+        User creator = userRepository.findByUsername(getCurrentUsername()).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXIST)
         );
 

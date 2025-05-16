@@ -1,6 +1,7 @@
 package com.be.java.foxbase.controller;
 
 import com.be.java.foxbase.dto.request.InteractionRequest;
+import com.be.java.foxbase.dto.request.UserInteractionRequest;
 import com.be.java.foxbase.dto.response.ApiResponse;
 import com.be.java.foxbase.dto.response.InteractionResponse;
 import com.be.java.foxbase.service.InteractionService;
@@ -23,10 +24,17 @@ public class InteractionController {
                 .build();
     }
 
-    @GetMapping("/count")
-    ApiResponse<Map<InteractionType, Integer>> countInteractions(@RequestBody InteractionRequest interactionRequest) {
+    @PostMapping("/count")
+    ApiResponse<Map<InteractionType, Integer>> countInteractions(@RequestBody UserInteractionRequest interactionRequest) {
         return ApiResponse.<Map<InteractionType, Integer>>builder()
                 .data(interactionService.countInteractions(interactionRequest))
+                .build();
+    }
+
+    @PostMapping("/get")
+    ApiResponse<InteractionType> get(@RequestBody UserInteractionRequest interactionRequest) {
+        return ApiResponse.<InteractionType>builder()
+                .data(interactionService.getMyInteraction(interactionRequest))
                 .build();
     }
 }

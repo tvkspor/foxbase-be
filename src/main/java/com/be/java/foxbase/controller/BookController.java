@@ -32,6 +32,13 @@ public class BookController {
                 .build();
     }
 
+    @DeleteMapping("/{id}")
+    ApiResponse<Boolean> delete(@PathVariable Long id){
+        return ApiResponse.<Boolean>builder()
+                .data(bookService.removeWork(id))
+                .build();
+    }
+
     @PostMapping("/filter")
     ApiResponse<PaginatedResponse<BookResponse>> getByFilter(
             @RequestBody BookFilterRequest request,

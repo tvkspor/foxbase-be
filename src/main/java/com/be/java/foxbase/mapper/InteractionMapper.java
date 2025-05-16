@@ -21,7 +21,7 @@ public class InteractionMapper {
 
     public Interaction toInteraction(InteractionRequest interactionRequest, User interactUser, Rating rating) {
         return Interaction.builder()
-                .id(new InteractionId(interactionRequest.getInteractUsername(), interactionRequest.getCreatorUsername(), interactionRequest.getRatedBookId()))
+                .id(new InteractionId(interactUser.getUsername(), interactionRequest.getCreatorUsername(), interactionRequest.getRatedBookId()))
                 .action(interactionRequest.getAction())
                 .rating(rating)
                 .interact(interactUser)

@@ -70,6 +70,16 @@ public class BookService {
         return bookMapper.toBookResponse(book);
     }
 
+    public Boolean removeWork(Long bookId){
+        try {
+            publishedBookRepository.deleteById(new UserBookId(getCurrentUsername(), bookId));
+            bookRepository.deleteById(bookId);
+            return true;
+        } catch (AppException e) {
+            return false;
+        }
+    }
+
     public BookResponse getBookById(Long id){
         var book = bookRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
         var response = bookMapper.toBookResponse(book);

@@ -44,7 +44,7 @@ public class RatingMapper {
 
     public Rating toRating(RatingRequest ratingRequest, User creator, Book ratedBook){
         return Rating.builder()
-                .userBookRatingId(new UserBookRatingId(ratingRequest.getCreatorUsername(), ratingRequest.getRatedBookId()))
+                .userBookRatingId(new UserBookRatingId(creator.getUsername(), ratingRequest.getRatedBookId()))
                 .user(creator)
                 .book(ratedBook)
                 .rate(ratingRequest.getRate())

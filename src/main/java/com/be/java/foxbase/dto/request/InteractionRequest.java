@@ -13,9 +13,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InteractionRequest {
-    @JsonProperty("interactUsername")
-    String interactUsername;
-
     @JsonProperty("creatorUsername")
     String creatorUsername;
 

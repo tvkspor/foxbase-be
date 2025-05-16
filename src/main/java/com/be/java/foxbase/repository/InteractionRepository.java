@@ -13,10 +13,8 @@ public interface InteractionRepository extends JpaRepository<Interaction, Intera
     @Query("SELECT COUNT(i.action) FROM Interaction i " +
             "WHERE i.action = :action " +
             "AND i.id.creatorUsername = :creator " +
-            "AND i.id.interactUsername = :interact " +
             "AND i.id.ratedBookId = :bookId")
-    int countInteraction(@Param("action")InteractionType action,
+    int countInteraction(@Param("action") InteractionType action,
                          @Param("creator") String creator,
-                         @Param("interact") String interact,
                          @Param("bookId") Long bookId);
 }

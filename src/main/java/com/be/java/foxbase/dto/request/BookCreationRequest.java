@@ -16,5 +16,4 @@ public class BookCreationRequest {
     String imageUrl;
     String genre;
     Long price;
-    String publisher;
 }

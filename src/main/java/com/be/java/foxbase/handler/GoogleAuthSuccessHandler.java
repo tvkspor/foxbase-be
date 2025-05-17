@@ -48,20 +48,6 @@ public class GoogleAuthSuccessHandler implements AuthenticationSuccessHandler {
 
         String jwt = authenticationService.generateToken(email);
 
-        AuthenticationResponse authResponse = AuthenticationResponse.builder()
-                .token(jwt)
-                .authenticated(true)
-                .build();
-
-        ApiResponse<AuthenticationResponse> apiResponse = ApiResponse.<AuthenticationResponse>builder()
-                .statusCode(HttpServletResponse.SC_OK)
-                .message("Authentication successful with Google")
-                .data(authResponse)
-                .build();
-
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_OK);
-        ObjectMapper objectMapper = new ObjectMapper();
-        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        response.sendRedirect("http://localhost:5173/oauth2-success?token=" + jwt);
     }
 }

@@ -10,6 +10,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.http.MediaType;                 // <-- thêm
+import org.springframework.web.multipart.MultipartFile;  // <-- thêm
+import com.fasterxml.jackson.databind.ObjectMapper;  
+
 import java.util.List;
 
 @RestController
@@ -110,4 +114,33 @@ public class BookController {
                 .data(bookService.get6CommunityBooks())
                 .build();
     }
+
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ApiResponse<BookResponse> uploadBook(
+            @RequestPart("meta") String metaJson,
+            @RequestPart("pdf") MultipartFile pdfFile,
+            @RequestPart(value = "cover", required = false) MultipartFile coverFile
+    ) {
+        try {
+                ObjectMapper mapper = new ObjectMapper();
+                BookCreationRequest meta = mapper.readValue(metaJson, BookCreationRequest.class);
+
+                return ApiResponse.<BookResponse>builder()
+                        .data(bookService.uploadAndPublish(meta, pdfFile, coverFile))
+                        .build();
+        } catch (Exception e) {
+                throw new RuntimeException("Lỗi parse JSON meta: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<BookResponse> getBookById(@PathVariable Long id) {
+        BookResponse book = bookService.getBookById(id);
+        return ApiResponse.<BookResponse>builder()
+                .code(0)
+                .message("Success")
+                .data(book)
+                .build();
+    }
+
  }

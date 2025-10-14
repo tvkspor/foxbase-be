@@ -2,8 +2,17 @@ server:
     port: 8080
     servlet:
         context-path: /foxbase-be
+    tomcat:
+        max-swallow-size: -1       
+        max-http-form-post-size: -1
 
 spring:
+    servlet:
+        multipart:
+            max-file-size: 100MB 
+            max-request-size: 100MB 
+    config:
+        import: optional:file:.env[.properties]
     datasource:
         url: jdbc:mysql://localhost:3306/foxbase_db
         username: root

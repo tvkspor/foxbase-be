@@ -22,6 +22,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;        // <-- để dùng Map<String, Object>
+import java.io.IOException;  // <-- để catch IOException
+import org.springframework.web.multipart.MultipartFile; // nếu chưa có
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -49,6 +53,9 @@ public class BookService {
 
     @Autowired
     private RatingRepository ratingRepository;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     private String getCurrentUsername() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
@@ -262,5 +269,38 @@ public class BookService {
             return buildPaginatedBookResponse(convertListToPage(books, pageable));
         }
     }
+
+
+    public BookResponse uploadAndPublish(BookCreationRequest meta, MultipartFile pdf, MultipartFile cover) {
+        try {
+            // Upload file PDF
+            Map<String, Object> pdfRes = cloudinaryService.uploadPdf(pdf);
+            String pdfUrl = (String) pdfRes.get("secure_url");
+
+            // Upload ảnh bìa (nếu có)
+            String coverUrl = null;
+            if (cover != null && !cover.isEmpty()) {
+                Map<String, Object> coverRes = cloudinaryService.uploadImage(cover);
+                coverUrl = (String) coverRes.get("secure_url");
+            }
+
+            // Gắn URL vào meta
+            meta.setContentUrl(pdfUrl);
+            meta.setImageUrl(coverUrl);
+
+            // Gọi lại publish() như bình thường
+            return publish(meta);
+        } catch (IOException e) {
+            throw new RuntimeException("Upload thất bại: " + e.getMessage(), e);
+        }
+    }
+
+    public BookResponse getBookById(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
+
+        return bookMapper.toBookResponse(book);
+    }
+
 
 }

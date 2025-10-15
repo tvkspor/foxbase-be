@@ -35,14 +35,14 @@ Built with a modern, scalable backend stack to support authentication, content m
 - Run the integration tests:
 
 ```
-newman run src/test/newman/collections/foxbase_collection.json -e src/test/newman/env/foxbase_environment.json
+newman run src/test/newman/collections/<test-name>.json -e src/test/newman/env/environment.json
 ```
 
 - Run the tests with reporter:
 
 ```
-newman run src/test/newman/collections/foxbase_collection.json \
-  -e src/test/newman/env/foxbase_environment.json \
+newman run src/test/newman/collections/<test-name>.json \
+  -e src/test/newman/env/environment.json \
   --reporters cli,html \
   --reporter-html-export src/test/newman/results/results.html
 ```

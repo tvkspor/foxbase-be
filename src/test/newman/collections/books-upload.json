@@ -1,31 +1,13 @@
 {
   "info": {
-    "name": "Foxbase API Test",
-    "_postman_id": "foxbase-collection-001",
-    "description": "Automated tests for Foxbase API using MySQL test database and real Cloudinary uploads. Token is obtained automatically after login.",
+    "name": "Book Upload Tests",
+    "_postman_id": "books-upload.json",
+    "description": "Test cases for the POST /books/upload using MySQL test database and real Cloudinary uploads. Token is obtained automatically after login.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:8080/foxbase-be"
-    },
-    {
-      "key": "username",
-      "value": "user01"
-    },
-    {
-      "key": "password",
-      "value": "Password123"
-    },
-    {
-      "key": "token",
-      "value": ""
-    }
-  ],
   "item": [
     {
-      "name": "Reset Database",
+      "name": "Pre-request: Reset Database",
       "request": {
         "method": "DELETE",
         "header": [],
@@ -46,7 +28,7 @@
       ]
     },
     {
-      "name": "Register User",
+      "name": "Pre-request: Register User",
       "request": {
         "method": "POST",
         "header": [
@@ -75,7 +57,7 @@
       ]
     },
     {
-      "name": "Login User",
+      "name": "Pre-request: Login User",
       "request": {
         "method": "POST",
         "header": [
@@ -109,7 +91,7 @@
       ]
     },
     {
-      "name": "Upload Book - Missing cover file",
+      "name": "Test 001: Upload Book - Missing cover file",
       "request": {
         "method": "POST",
         "header": [
@@ -151,7 +133,7 @@
       ]
     },
     {
-      "name": "Upload Book - Missing PDF file",
+      "name": "Test 002: Upload Book - Missing PDF file",
       "request": {
         "method": "POST",
         "header": [
@@ -193,7 +175,7 @@
       ]
     },
     {
-      "name": "Upload and Publish Book",
+      "name": "Test 003: Upload and Publish Book",
       "request": {
         "method": "POST",
         "header": [

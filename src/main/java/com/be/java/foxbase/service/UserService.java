@@ -57,11 +57,28 @@ public class UserService {
     }
 
     public UserResponse createUser(UserCreationRequest request) {
-        User user = userMapper.toUser(request);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        String username = request.getUsername();
+        String email = request.getEmail();
+        String password = request.getPassword();
 
-        boolean existUsername = userRepository.existsById(request.getUsername());
-        boolean existMail = userRepository.existsByEmail(request.getEmail());
+        // Validate username
+        if (username == null || !isLengthValid(username, 6, 32) || containsWhitespace(username) || !isValidUsername(username)) {
+            throw new AppException(ErrorCode.INVALID_USERNAME_FORMAT);
+        }
+
+        // Validate email
+        if (email == null || !isLengthValid(email, 6, 64) || containsWhitespace(email) || !isValidEmail(email)) {
+            throw new AppException(ErrorCode.INVALID_EMAIL_FORMAT);
+        }
+
+        // Validate password
+        if (password == null || !isLengthValid(password, 6, 32) || containsWhitespace(password) || !isStrongPassword(password)) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD_FORMAT);
+        }
+
+        // Check duplicates
+        boolean existUsername = userRepository.existsById(username);
+        boolean existMail = userRepository.existsByEmail(email);
 
         if (existUsername) {
             throw new AppException(ErrorCode.USER_EXIST);
@@ -71,8 +88,38 @@ public class UserService {
             throw new AppException(ErrorCode.EMAIL_ALREADY_USED);
         }
 
+        User user = userMapper.toUser(request);
+        user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
+
         return userMapper.toUserResponse(user);
+    }
+
+    private boolean isLengthValid(String value, int min, int max) {
+        int len = value.trim().length();
+        return len >= min && len <= max;
+    }
+
+    private boolean containsWhitespace(String value) {
+        return value.contains(" ");
+    }
+
+    private boolean isValidUsername(String username) {
+        // Only letters, numbers, and underscores are allowed.
+        String regex = "^[A-Za-z0-9_]+$";
+        return username.matches(regex);
+    }
+
+    private boolean isValidEmail(String email) {
+        // Name part: 6–32 characters [a-zA-Z0-9_], domain any valid character, ending in .com
+        String regex = "^[A-Za-z0-9_.]{6,32}@[A-Za-z0-9.-]+\\.com$";
+        return email.matches(regex);
+    }
+
+    private boolean isStrongPassword(String password) {
+        // At least 1 lowercase letter, 1 uppercase letter, 1 number, 1 special character, no spaces
+        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!_])[A-Za-z\\d@#$%^&+=!_]{6,32}$";
+        return password.matches(regex);
     }
 
     public UserResponse getMyInfo(){

@@ -19,8 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.Map; // <-- để dùng Map<String, Object>
+import java.io.IOException; // <-- để catch IOException
+import org.springframework.web.multipart.MultipartFile; // nếu chưa có
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +55,9 @@ public class BookService {
 
     @Autowired
     private RatingRepository ratingRepository;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     private String getCurrentUsername() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
@@ -263,4 +272,28 @@ public class BookService {
         }
     }
 
+
+  public BookResponse uploadAndPublish(BookCreationRequest meta, MultipartFile pdf, MultipartFile cover) {
+    try {
+      if (pdf == null || pdf.isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PDF file is required.");
+      }
+      if (cover == null || cover.isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cover image is required.");
+      }
+
+      Map<String, Object> pdfRes = cloudinaryService.uploadPdf(pdf);
+      String pdfUrl = (String) pdfRes.get("secure_url");
+
+      Map<String, Object> coverRes = cloudinaryService.uploadImage(cover);
+      String coverUrl = (String) coverRes.get("secure_url");
+
+      meta.setContentUrl(pdfUrl);
+      meta.setImageUrl(coverUrl);
+
+      return publish(meta);
+    } catch (IOException e) {
+      throw new RuntimeException("Upload failed: " + e.getMessage(), e);
+    }
+  }
 }

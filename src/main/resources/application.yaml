@@ -15,7 +15,7 @@ spring:
         import: optional:file:.env[.properties]
     datasource:
         url: jdbc:mysql://localhost:3306/foxbase_db
-        username: root
+        username: ${MYSQL_ROOT_USERNAME}
         password: ${MYSQL_ROOT_PASSWORD}
     jpa:
         hibernate:
@@ -52,5 +52,3 @@ jwt:
     signerKey: ${SIGNER_KEY}
     valid-duration: 3600 # in second
     refreshable-duration: 36000 # in seconds
-
-

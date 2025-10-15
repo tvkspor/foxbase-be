@@ -18,3 +18,31 @@ Built with a modern, scalable backend stack to support authentication, content m
 - **ZaloPay** *(Sandbox for testing)* – Payment integration
 - **JWT** – Token-based authentication
 
+## Build the run the project
+
+- Run the main application:
+
+```
+.\gradlew bootRun
+```
+
+- Run the test profile:
+
+```
+./gradlew bootRun --args='--spring.profiles.active=test'
+```
+
+- Run the integration tests:
+
+```
+newman run src/test/newman/collections/foxbase_collection.json -e src/test/newman/env/foxbase_environment.json
+```
+
+- Run the tests with reporter:
+
+```
+newman run src/test/newman/collections/foxbase_collection.json \
+  -e src/test/newman/env/foxbase_environment.json \
+  --reporters cli,html \
+  --reporter-html-export src/test/newman/results/results.html
+```

@@ -18,7 +18,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -48,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_AUTH_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_EXPLORE_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST, "/books/filter").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/test/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 ->

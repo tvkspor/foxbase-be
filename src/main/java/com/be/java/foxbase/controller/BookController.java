@@ -30,9 +30,12 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    ApiResponse<BookResponse> get(@PathVariable Long id){
+    public ApiResponse<BookResponse> getBookById(@PathVariable Long id) {
+        BookResponse book = bookService.getBookById(id);
         return ApiResponse.<BookResponse>builder()
-                .data(bookService.getBookById(id))
+                .statusCode(0)
+                .message("Success")
+                .data(book)
                 .build();
     }
 
@@ -132,15 +135,4 @@ public class BookController {
                 throw new RuntimeException("Lỗi parse JSON meta: " + e.getMessage());
         }
     }
-
-    @GetMapping("/{id}")
-    public ApiResponse<BookResponse> getBookById(@PathVariable Long id) {
-        BookResponse book = bookService.getBookById(id);
-        return ApiResponse.<BookResponse>builder()
-                .code(0)
-                .message("Success")
-                .data(book)
-                .build();
-    }
-
- }
+}
